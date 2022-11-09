@@ -36,3 +36,10 @@ http_archive(
   strip_prefix = "googletest-609281088cfefc76f9d0ce82e1ff6c30cc3591e5",
   sha256 = "5cf189eb6847b4f8fc603a3ffff3b0771c08eec7dd4bd961bfd45477dd13eb73",
 )
+
+http_archive(
+  name = "metal-cpp",
+  urls = ["https://github.com/mardlucca/thirdparty-libs/raw/master/cpp/macos/metal-cpp_macOS12_iOS15.zip"],
+  build_file = "@//:metal-cpp.BUILD",
+  sha256 = "a4e2d4668951b6f2595618ed8c5dc514fc94fda5487fc722b1c1ff29d7b524f7"
+)

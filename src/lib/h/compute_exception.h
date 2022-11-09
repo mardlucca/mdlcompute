@@ -26,16 +26,35 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _MDL_COMPUTE
-#define _MDL_COMPUTE
+#ifndef _MDL_COMPUTE_EXCEPTION
+#define _MDL_COMPUTE_EXCEPTION
+
+#include <stdexcept>
 
 namespace mdl {
 namespace compute {
+  class CompilationException : public std::runtime_error {
+    public:
+      CompilationException(const CompilationException& other);
+      CompilationException(const char* message);
+      CompilationException(const std::string& message);
+  };
 
-  int TimesTwo(int num);
+  class FunctionNotFoundException : public std::runtime_error {
+    public:
+      FunctionNotFoundException(const FunctionNotFoundException& other);
+      FunctionNotFoundException(const char* message);
+      FunctionNotFoundException(const std::string& message);
+  };
 
-} // comput
-} // mdl
+  class RuntimeException : public std::runtime_error {
+    public:
+      RuntimeException(const RuntimeException& other);
+      RuntimeException(const char* message);
+      RuntimeException(const std::string& message);
+  };
 
+}
+}
 
-#endif  // _MDL_COMPUTE
+#endif // _MDL_COMPUTE_EXCEPTION

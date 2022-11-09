@@ -26,18 +26,30 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "../h/compute.h"
-
-#include <iostream>
+#include "../h/compute_exception.h"
 
 namespace mdl {
 namespace compute {
 
-  int TimesTwo(int num) {
-    return num * 2;
-  }
+  CompilationException::CompilationException(const CompilationException& other) 
+      : std::runtime_error(other) {}
+  CompilationException::CompilationException(const char* message)
+      : std::runtime_error(message) {}
+  CompilationException::CompilationException(const std::string& message)
+      : std::runtime_error(message) {}
 
+  FunctionNotFoundException::FunctionNotFoundException(const FunctionNotFoundException& other) 
+      : std::runtime_error(other) {}
+  FunctionNotFoundException::FunctionNotFoundException(const char* message)
+      : std::runtime_error(message) {}
+  FunctionNotFoundException::FunctionNotFoundException(const std::string& message)
+      : std::runtime_error(message) {}
+
+  RuntimeException::RuntimeException(const RuntimeException& other) 
+      : std::runtime_error(other) {}
+  RuntimeException::RuntimeException(const char* message)
+      : std::runtime_error(message) {}
+  RuntimeException::RuntimeException(const std::string& message)
+      : std::runtime_error(message) {}
 } // compute
 } // mdl
-
-

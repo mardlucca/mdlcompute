@@ -26,47 +26,16 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-load("@rules_cc//cc:defs.bzl", "cc_binary")
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("@rules_cc//cc:defs.bzl", "cc_test")
-
-package(default_visibility = ["//visibility:public"])
 
 cc_library(
-  name = "mdl_compute",
-  srcs = glob(["src/lib/cc/**/*.cc"]),
-  hdrs = glob(["src/lib/h/**/*.h", "src/lib/h/**/*.hpp", "includes/**/*.h"]),
-  includes = [ "includes" ],
-  visibility = ["//visibility:public"],
-  deps = [ 
-        "@metal-cpp//:metal-cpp"
-  ],
-  linkopts = [
-      '-framework', 'Foundation',
-      '-framework', 'Metal',
-      '-framework', 'QuartzCore',
-  ]
-)
-
-alias(
-  name = "lib",
-  actual = ":mdl_compute"
-)
-
-cc_test(
-  name = "tests", 
-  size = "small",
-  srcs = glob(["src/test/cc/**/*.cc"]),
-  deps = [
-    "@com_google_googletest//:gtest_main",
-    "//:lib"
-  ],
-  data = [ "test_resources" ]
-)
-
-filegroup(
-  name = "test_resources",
-  srcs = glob([
-      "src/test/resources/**/*.*"
-  ]),
+    name = "metal-cpp",
+    hdrs = glob([
+        "metal-cpp/Foundation/*.hpp",
+        "metal-cpp/Metal/*.hpp",
+        "metal-cpp/QuartzCore/*.hpp",
+        "metal-cpp/SingleHeader/*.hpp",
+    ]),
+    visibility = ["//visibility:public"],
+    includes = ["metal-cpp"],
 )

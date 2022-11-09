@@ -32,14 +32,15 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "bazel-${workspaceFolderBasename}/external/com_google_googletest/googletest/include"
+                "bazel-${workspaceFolderBasename}/external/com_google_googletest/googletest/include",
+                "bazel-${workspaceFolderBasename}/external/metal-cpp/metal-cpp"
             ],
             "defines": [],
             "macFrameworkPath": [
                 "/Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk/System/Library/Frameworks"
             ],
             "compilerPath": "/usr/bin/clang",
-            "cStandard": "c17",
+            "cppStandard": "c++20",
             "intelliSenseMode": "macos-clang-x64"
         }
     ],
