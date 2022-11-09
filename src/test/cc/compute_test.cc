@@ -26,4 +26,18 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "../src/lib/h/examplelib.h"
+#include <gtest/gtest.h>
+
+#include <mdlcompute.h>
+
+namespace mdl {
+namespace compute {
+namespace compute_test {
+
+  TEST(ComputeTestSuite, TestTimesTwo) {
+    ASSERT_EQ(20, TimesTwo(10));
+  }
+
+} // compute_test
+} // compute
+} // mdl

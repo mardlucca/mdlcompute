@@ -26,11 +26,4 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <example.h>
-
-#include <iostream>
-
-int main() {
-  std::cout << "Example: " << mdl::example::TimesTwo(10) << std::endl;
-  return 0;
-}
+#include "../src/lib/h/compute.h"

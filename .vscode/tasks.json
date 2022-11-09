@@ -56,29 +56,6 @@
     },
     {
       "type": "process",
-      "label": "Build Main",
-      "command": "bazel",
-      "args": [
-        "build",
-        "-c",
-        "dbg",
-        "--spawn_strategy=local",
-        "//:main"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "problemMatcher": [
-        "$gcc"
-      ],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "detail": "compiler: bazel"
-    },
-    {
-      "type": "process",
       "label": "Build Tests",
       "command": "bazel",
       "args": [

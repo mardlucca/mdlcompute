@@ -26,7 +26,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-workspace(name = "mdl_cpp_template")
+workspace(name = "mdl_compute")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 

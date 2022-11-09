@@ -26,18 +26,18 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "../h/examplelib.h"
+#include "../h/compute.h"
 
 #include <iostream>
 
 namespace mdl {
-namespace example {
+namespace compute {
 
   int TimesTwo(int num) {
     return num * 2;
   }
 
-} // example
+} // compute
 } // mdl
 
 

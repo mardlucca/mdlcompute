@@ -44,19 +44,6 @@
       "externalConsole": false,
       "MIMode": "lldb",
       "preLaunchTask": "Build Tests"
-    },
-    {
-      "name": "Launch Main",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${workspaceFolder}/bazel-bin/main",
-      "args": [],
-      "stopAtEntry": false,
-      "cwd": "${workspaceFolder}/bazel-bin/",
-      "environment": [],
-      "externalConsole": false,
-      "MIMode": "lldb",
-      "preLaunchTask": "Build Main"
     }
   ]
 }

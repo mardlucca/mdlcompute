@@ -62,11 +62,3 @@ filegroup(
       "src/test/resources/**/*.*"
   ]),
 )
-
-cc_binary(
-  name = "main",
-  srcs = ["src/main/cc/main.cc"],
-  deps = [
-      "//:lib",
-  ]
-)
