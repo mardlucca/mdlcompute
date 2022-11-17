@@ -62,11 +62,37 @@ namespace compute_test {
       }
   )";
 
+  const char* shaderSrc2 = R"(
+      #include <metal_stdlib>
+      using namespace metal;
+
+      kernel void swap(device float* inA [[buffer(0)]], 
+                       device float* inB [[buffer(1)]],
+                       uint index [[ thread_position_in_grid ]])
+      {
+          float tmp = inA[index];
+          inA[index] = inB[index];
+          inB[index] = tmp;
+      }
+  )";
+
+  const char* shaderSrc3 = R"(
+      #include <metal_stdlib>
+      using namespace metal;
+
+      kernel void set(device float* inA [[buffer(0)]], 
+                       device float* outB [[buffer(1)]],
+                       uint index [[ thread_position_in_grid ]])
+      {
+          outB[index] = inA[index];
+      }
+  )";
+
   const char* shaderSrcWithError = R"(
       #include <metal_stdlib>
       using namespace metal;
 
-      kernel void add_arrays(device const float* inA,
+      kernel void add_arrays(device const float* inA,`
                             device const float* inB,
                             device float* result,
                             uint index [[thread_position_in_grid]])
@@ -90,6 +116,68 @@ namespace compute_test {
     MetalComputeEngine engine;
     ASSERT_THROW(engine.LoadLibrary(shaderSrcWithError), CompilationException);
   }
+
+  TEST(ComputeTestSuite, TestLoadLibrary_Call1) {
+    MetalComputeEngine engine;
+    engine.LoadLibrary(shaderSrc);
+    engine.LoadLibrary(shaderSrc2);
+    engine.LoadLibrary(shaderSrc3);
+
+    const int kSize = 10;
+    float f1[kSize];
+    float f2[kSize];
+
+    for (int i = 0; i < kSize; i++) {
+      f1[i] = i;
+      f2[i] = kSize - i;
+    }
+    
+    auto if1 = inout(f1);
+    auto if2 = inout(f2);
+    engine.NewBatch()
+        .WithGrid(1, kSize, 1, kSize).Call("swap", if1, if2)
+        .WithGrid(1, kSize, 1, kSize).Call("swap", if1, if2)
+        .Dispatch().Wait();
+
+    for (int i = 0; i < kSize; i++) {
+      cout << f1[i] << ", ";
+    }
+    cout << endl;
+    for (int i = 0; i < kSize; i++) {
+      cout << f2[i] << ", ";
+    }
+    cout << endl;
+  }
+
+  TEST(ComputeTestSuite, TestLoadLibrary_Call2) {
+    MetalComputeEngine engine;
+    engine.LoadLibrary(shaderSrc);
+    engine.LoadLibrary(shaderSrc2);
+    engine.LoadLibrary(shaderSrc3);
+
+    const int kSize = 10;
+    float f1[kSize];
+    float f2[kSize];
+
+    for (int i = 0; i < kSize; i++) {
+      f1[i] = i;
+    }
+    
+    auto p1 = priv(sizeof(f1));
+    engine.NewBatch()
+        .WithGrid(1, kSize, 1, kSize).Call("set", in(f1), p1)
+        .WithGrid(1, kSize, 1, kSize).Call("set", p1, out(f2))
+        .Dispatch().Wait();
+
+    for (int i = 0; i < kSize; i++) {
+      cout << f1[i] << ", ";
+    }
+    cout << endl;
+    for (int i = 0; i < kSize; i++) {
+      cout << f2[i] << ", ";
+    }
+    cout << endl;
+  }  
 } // compute_test
 } // compute
 } // mdl

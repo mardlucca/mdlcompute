@@ -26,6 +26,19 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "../src/lib/h/compute_exception.h"
-#include "../src/lib/h/arg_buffers.hpp"
-#include "../src/lib/h/metal_compute_engine.h"
+#include "../h/arg_buffers.hpp"
+
+#include <atomic>
+
+namespace mdl {
+namespace compute {
+  std::atomic_size_t idSeq = 0;
+
+  private_buffer priv(std::size_t size) {
+    return {
+      .id = ++idSeq, 
+      .size = size
+    };
+  }
+}
+}

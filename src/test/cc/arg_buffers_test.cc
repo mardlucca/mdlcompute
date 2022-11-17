@@ -26,6 +26,66 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "../src/lib/h/compute_exception.h"
-#include "../src/lib/h/arg_buffers.hpp"
-#include "../src/lib/h/metal_compute_engine.h"
+#include <gtest/gtest.h>
+
+#include <mdlcompute.h>
+#include <iostream>
+#include <string>
+
+using std::cout;
+using std::endl; 
+
+namespace mdl {
+namespace compute {
+namespace compute_test {
+
+
+
+  TEST(ArgBuffersTetSuite, TestInBuffer) {
+    int x = 10;
+    in_buffer buff = in(x);
+
+    ASSERT_EQ(sizeof(int), buff.size);
+    ASSERT_TRUE(buff.id > 0);
+    const int* ptr = static_cast<const int *>(buff.data);
+    ASSERT_EQ(x, ptr[0]);
+
+    in_buffer buff2 = in(100L);
+
+    ASSERT_EQ(sizeof(long), buff2.size);
+    ASSERT_EQ(buff.id + 1, buff2.id);
+    // cast must be const
+    const long * ptr2 = static_cast<const long *>(buff2.data);
+    ASSERT_EQ(100L, ptr2[0]);
+
+    in_buffer buff3 = buff2;
+    ASSERT_EQ(sizeof(long), buff3.size);
+    ASSERT_EQ(buff2.id, buff3.id);
+    const long * ptr3 = static_cast<const long *>(buff3.data);
+    ASSERT_EQ(100L, ptr3[0]);
+  }
+
+  TEST(ArgBuffersTetSuite, TestInBuffer_BoundedArray) {
+    int x[] = {1, 2, 3, 4, 5};
+    in_buffer buff = in(x);
+
+    ASSERT_EQ(5 * sizeof(int), sizeof(x));
+    ASSERT_EQ(sizeof(x), buff.size);
+    ASSERT_TRUE(buff.id > 0);
+    ASSERT_EQ(&x, buff.data);
+  }
+
+  void unboundedArray(int a[], std::size_t size) {
+    in_buffer buff = in(a, size);
+    ASSERT_EQ(buff.size, size);
+    ASSERT_EQ(&a, buff.data);
+  }
+
+  TEST(ArgBuffersTetSuite, TestInBuffer_UnboundedArray) {
+    int x[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    unboundedArray(x, sizeof(x));
+  }
+
+} // compute_test
+} // compute
+} // mdl
