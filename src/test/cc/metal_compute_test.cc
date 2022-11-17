@@ -119,9 +119,7 @@ namespace compute_test {
 
   TEST(ComputeTestSuite, TestLoadLibrary_Call1) {
     MetalComputeEngine engine;
-    engine.LoadLibrary(shaderSrc);
     engine.LoadLibrary(shaderSrc2);
-    engine.LoadLibrary(shaderSrc3);
 
     const int kSize = 10;
     float f1[kSize];
@@ -132,11 +130,8 @@ namespace compute_test {
       f2[i] = kSize - i;
     }
     
-    auto if1 = inout(f1);
-    auto if2 = inout(f2);
     engine.NewBatch()
-        .WithGrid(1, kSize, 1, kSize).Call("swap", if1, if2)
-        .WithGrid(1, kSize, 1, kSize).Call("swap", if1, if2)
+        .WithGrid(1, kSize, 1, kSize).Call("swap", inout(f1), inout(f2))
         .Dispatch().Wait();
 
     for (int i = 0; i < kSize; i++) {

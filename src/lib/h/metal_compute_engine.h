@@ -81,11 +81,6 @@ namespace compute {
         encoder->setBuffer(buffers[buff.id].mtlBuffer, 0, argIndex);
         argIndex++;
       }
-
-      template <>
-      void AddBuffer<in_buffer>(const in_buffer& buff);
-      template <>
-      void AddBuffer<private_buffer>(const private_buffer& buff);   
     };
 
     public:
