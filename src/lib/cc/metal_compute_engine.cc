@@ -190,8 +190,7 @@ namespace compute {
 
   MTL::Buffer * MetalComputeEngine::GetBuffer(const out_buffer& buffer) {
     if (!buffersById.contains(buffer.id)) {
-      buffersById[buffer.id] = device->newBuffer(
-        buffer.data, buffer.size, MTL::ResourceStorageModeManaged);
+      buffersById[buffer.id] = device->newBuffer(buffer.size, MTL::ResourceStorageModeManaged);
     }
     return buffersById[buffer.id];
   }
@@ -289,6 +288,10 @@ namespace compute {
 
   void MetalComputeEngine::Gate::Wait() const {
     batch->commandBuffer->waitUntilCompleted();
+    
+    if (batch->commandBuffer->error()) {
+      throw RuntimeException(batch->commandBuffer->error()->description()->utf8String());
+    }
 
     for (auto it = batch->buffers.begin(); it != batch->buffers.end(); it++) {
       BufferDescriptor& desc = it->second;

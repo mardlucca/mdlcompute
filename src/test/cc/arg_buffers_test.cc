@@ -78,12 +78,70 @@ namespace compute_test {
   void unboundedArray(int a[], std::size_t size) {
     in_buffer buff = in(a, size);
     ASSERT_EQ(buff.size, size);
-    ASSERT_EQ(&a, buff.data);
+    ASSERT_EQ(a, buff.data);
   }
 
   TEST(ArgBuffersTetSuite, TestInBuffer_UnboundedArray) {
     int x[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     unboundedArray(x, sizeof(x));
+  }
+
+  TEST(ArgBuffersTetSuite, TestInBuffer_Pointer) {
+    const std::uint8_t x = 1;
+    const std::uint8_t * px = &x;
+
+    in_buffer buff = in(px);
+    ASSERT_EQ(&x, buff.data);
+    ASSERT_EQ(sizeof(x), buff.size);
+  }
+
+  TEST(ArgBuffersTetSuite, TestInBuffer_Vector) {
+    const std::vector<int> v = {10, 20, 30};
+
+    in_buffer buff = in(v);
+    ASSERT_EQ(v.data(), buff.data);
+    ASSERT_EQ(v.size() * sizeof(int), buff.size);
+  }
+
+  TEST(ArgBuffersTetSuite, TestInBuffer_StdArray) {
+    const std::array<std::uint16_t, 10> a = {1, 2, 3};
+
+    in_buffer buff = in(a);
+    ASSERT_EQ(a.data(), buff.data);
+    ASSERT_EQ(a.size() * sizeof(std::uint16_t), buff.size);
+  }
+
+  TEST(ArgBuffersTetSuite, TestInOutBuffer) {
+    std::uint8_t x = 1;
+
+    inout_buffer buff = inout(x);
+    ASSERT_EQ(&x, buff.data);
+    ASSERT_EQ(sizeof(x), buff.size);
+  }
+
+  TEST(ArgBuffersTetSuite, TestInOutBuffer_Pointer) {
+    std::uint8_t x = 1;
+    std::uint8_t * px = &x;
+
+    inout_buffer buff = inout(px);
+    ASSERT_EQ(&x, buff.data);
+    ASSERT_EQ(sizeof(x), buff.size);
+  }
+
+  TEST(ArgBuffersTetSuite, TestInOutBuffer_Vector) {
+    std::vector<int> v = {10, 20, 30};
+
+    inout_buffer buff = inout(v);
+    ASSERT_EQ(v.data(), buff.data);
+    ASSERT_EQ(v.size() * sizeof(int), buff.size);
+  }
+
+  TEST(ArgBuffersTetSuite, TestInOutBuffer_StdArray) {
+    std::array<std::uint16_t, 10> a;
+
+    inout_buffer buff = inout(a);
+    ASSERT_EQ(a.data(), buff.data);
+    ASSERT_EQ(a.size() * sizeof(std::uint16_t), buff.size);
   }
 
 } // compute_test

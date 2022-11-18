@@ -29,8 +29,11 @@
 #ifndef _MDL_COMPUTE_ARG_BUFFERS
 #define _MDL_COMPUTE_ARG_BUFFERS
 
+#include <array>
 #include <atomic>
+#include <type_traits>
 #include <utility>
+#include <vector>
 
 namespace mdl {
 namespace compute {
@@ -39,6 +42,7 @@ namespace compute {
   enum class BufferType {
     In, Out, InOut, Private, Shared
   };
+
 
   template <BufferType BT, class DT = void*>
   struct buffer {
@@ -49,29 +53,85 @@ namespace compute {
     BufferType GetType() const { return BT; }
   };
 
+
   typedef buffer<BufferType::In, const void*> in_buffer;
   typedef buffer<BufferType::InOut> inout_buffer;
   typedef buffer<BufferType::Out> out_buffer;
   typedef buffer<BufferType::Private, const void*> private_buffer;
   typedef buffer<BufferType::Shared> shared_buffer;
 
+
   template <class T>
   struct sizefn {
     std::size_t operator()(const T& value) {
-      return sizeof(value);
+      if constexpr(std::is_pointer_v<T>) {
+        return sizefn<typename std::remove_pointer<T>::type>{}(*value);
+      } else {
+        return sizeof(value);
+      }
     }
   };
   
   template <class T>
+  struct sizefn<std::vector<T>> {
+    std::size_t operator()(const std::vector<T>& value) {
+      return value.size() * sizeof(T);
+    }
+  };
+
+  template <class T, std::size_t N>
+  struct sizefn<std::array<T, N>> {
+    std::size_t operator()(const std::array<T, N>& value) {
+      return value.size() * sizeof(T);
+    }
+  };
+
+
+
+  template <class T>
   struct addressfn {
     void * operator()(T& value) {
-      return static_cast<void *>(&value);
+      if constexpr(std::is_pointer_v<T>) {
+        return addressfn<typename std::remove_pointer<T>::type>{}(*value);
+      } else {
+        return static_cast<void *>(&value);
+      }
     }
 
     const void * operator()(const T& value) {
-      return static_cast<const void *>(&value);
+      if constexpr(std::is_pointer_v<T>) {
+        typedef typename std::remove_pointer<T>::type cType;
+        typedef typename std::remove_const<cType>::type type;
+        return addressfn<type>{}(*value);
+      } else {
+        return static_cast<const void *>(&value);
+      }
     }
   };
+
+  template <class T>
+  struct addressfn<std::vector<T>> {
+    void * operator()(std::vector<T>& value) {
+      return value.data();
+    }
+
+    const void * operator()(const std::vector<T>& value) {
+      return value.data();
+    }
+  };
+
+  template <class T, std::size_t N>
+  struct addressfn<std::array<T, N>> {
+    void * operator()(std::array<T, N>& value) {
+      return value.data();
+    }
+
+    const void * operator()(const std::array<T, N>& value) {
+      return value.data();
+    }
+  };
+
+
 
   template <class T>
   in_buffer in(const T& val, std::size_t size = 0) {

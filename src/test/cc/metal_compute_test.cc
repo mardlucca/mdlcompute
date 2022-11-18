@@ -31,6 +31,7 @@
 #include <mdlcompute.h>
 #include <iostream>
 #include <string>
+#include <vector>
 
 using std::cout;
 using std::endl; 
@@ -80,11 +81,18 @@ namespace compute_test {
       #include <metal_stdlib>
       using namespace metal;
 
-      kernel void set(device float* inA [[buffer(0)]], 
+      kernel void copy(device float* inA [[buffer(0)]], 
                        device float* outB [[buffer(1)]],
                        uint index [[ thread_position_in_grid ]])
       {
           outB[index] = inA[index];
+      }
+
+      kernel void set(device float* outA [[buffer(0)]], 
+                       const device float& value [[buffer(1)]],
+                       uint index [[ thread_position_in_grid ]])
+      {
+          outA[index] = value;
       }
   )";
 
@@ -117,7 +125,7 @@ namespace compute_test {
     ASSERT_THROW(engine.LoadLibrary(shaderSrcWithError), CompilationException);
   }
 
-  TEST(ComputeTestSuite, TestLoadLibrary_Call1) {
+  TEST(ComputeTestSuite, TestCall_InOut) {
     MetalComputeEngine engine;
     engine.LoadLibrary(shaderSrc2);
 
@@ -127,7 +135,7 @@ namespace compute_test {
 
     for (int i = 0; i < kSize; i++) {
       f1[i] = i;
-      f2[i] = kSize - i;
+      f2[i] = kSize - i - 1;
     }
     
     engine.NewBatch()
@@ -135,18 +143,108 @@ namespace compute_test {
         .Dispatch().Wait();
 
     for (int i = 0; i < kSize; i++) {
-      cout << f1[i] << ", ";
+      ASSERT_FLOAT_EQ(kSize - i - 1, f1[i]);
+      ASSERT_FLOAT_EQ(i, f2[i]);
     }
-    cout << endl;
-    for (int i = 0; i < kSize; i++) {
-      cout << f2[i] << ", ";
+
+    engine.NewBatch()
+        .WithGrid(1, kSize - 1, 1, kSize - 1).Call("swap", inout(f1), inout(f2))
+        .Dispatch().Wait();
+
+    for (int i = 0; i < kSize - 1; i++) {
+      ASSERT_FLOAT_EQ(i, f1[i]);
+      ASSERT_FLOAT_EQ(kSize - i - 1, f2[i]);
     }
-    cout << endl;
+    ASSERT_FLOAT_EQ(9, f2[9]);
+    ASSERT_FLOAT_EQ(kSize - 9- 1, f1[9]);
   }
 
-  TEST(ComputeTestSuite, TestLoadLibrary_Call2) {
+  TEST(ComputeTestSuite, TestCall_In) {
     MetalComputeEngine engine;
-    engine.LoadLibrary(shaderSrc);
+    engine.LoadLibrary(shaderSrc2);
+    engine.LoadLibrary(shaderSrc3);
+
+    const int kSize = 10;
+    float f1[kSize];
+    
+    for (int i = 0; i < kSize; i++) {
+      f1[i] = i;
+    }
+
+    // modifying an "in" buffer has no effect
+    engine.NewBatch()
+        .WithGrid(1, kSize, 1, kSize).Call("set", in(f1), 2.0f)
+        .Dispatch().Wait();
+
+    for (int i = 0; i < kSize; i++) {
+      ASSERT_FLOAT_EQ(i, f1[i]);
+    }
+  }  
+
+  TEST(ComputeTestSuite, TestCall_DefaultArgumentType) {
+    MetalComputeEngine engine;
+    engine.LoadLibrary(shaderSrc2);
+    engine.LoadLibrary(shaderSrc3);
+
+    const int kSize = 10;
+    float f1[kSize];
+    
+    for (int i = 0; i < kSize; i++) {
+      f1[i] = i;
+    }
+
+    // by default, arguments are considered type "in"
+    engine.NewBatch()
+        .WithGrid(1, kSize, 1, kSize).Call("set", f1, 2.0f)
+        .Dispatch().Wait();
+
+    for (int i = 0; i < kSize; i++) {
+      ASSERT_FLOAT_EQ(i, f1[i]);
+    }
+  }  
+
+  TEST(ComputeTestSuite, TestCall_Out) {
+    MetalComputeEngine engine;
+    engine.LoadLibrary(shaderSrc2);
+    engine.LoadLibrary(shaderSrc3);
+
+    const int kSize = 10;
+    float f1[kSize];
+    
+    engine.NewBatch()
+        .WithGrid(1, kSize, 1, kSize).Call("set", out(f1), 2.0f)
+        .Dispatch().Wait();
+
+    for (int i = 0; i < kSize; i++) {
+      ASSERT_FLOAT_EQ(2.0f, f1[i]);
+    }
+  }  
+
+  TEST(ComputeTestSuite, TestCall_Shared) {
+    MetalComputeEngine engine;
+    engine.LoadLibrary(shaderSrc2);
+
+    const int kSize = 10;
+    float f1[kSize];
+    float f2[kSize];
+
+    for (int i = 0; i < kSize; i++) {
+      f1[i] = i;
+      f2[i] = kSize - i - 1;
+    }
+    
+    engine.NewBatch()
+        .WithGrid(1, kSize, 1, kSize).Call("swap", shared(f1), shared(f2))
+        .Dispatch().Wait();
+
+    for (int i = 0; i < kSize; i++) {
+      ASSERT_FLOAT_EQ(kSize - i - 1, f1[i]);
+      ASSERT_FLOAT_EQ(i, f2[i]);
+    }
+  }
+
+  TEST(ComputeTestSuite, TestCall_PrivateBuffer) {
+    MetalComputeEngine engine;
     engine.LoadLibrary(shaderSrc2);
     engine.LoadLibrary(shaderSrc3);
 
@@ -160,18 +258,101 @@ namespace compute_test {
     
     auto p1 = priv(sizeof(f1));
     engine.NewBatch()
-        .WithGrid(1, kSize, 1, kSize).Call("set", in(f1), p1)
-        .WithGrid(1, kSize, 1, kSize).Call("set", p1, out(f2))
+        .WithGrid(1, kSize, 1, kSize).Call("copy", f1, p1)    // same as in(f1)
+        .WithGrid(1, kSize, 1, kSize).Call("copy", p1, out(f2))
         .Dispatch().Wait();
 
     for (int i = 0; i < kSize; i++) {
-      cout << f1[i] << ", ";
+      ASSERT_FLOAT_EQ(f1[i], f2[i]);
     }
-    cout << endl;
+  }  
+
+  TEST(ComputeTestSuite, TestCall_InexistentFn) {
+    MetalComputeEngine engine;
+    engine.LoadLibrary(shaderSrc2);
+    engine.LoadLibrary(shaderSrc3);
+
+    const int kSize = 10;
+    float f1[kSize];
+    float f2[kSize];
+
     for (int i = 0; i < kSize; i++) {
-      cout << f2[i] << ", ";
+      f1[i] = i;
     }
-    cout << endl;
+    
+    auto p1 = priv(sizeof(f1));
+    ASSERT_THROW(
+        engine.NewBatch()
+          .WithGrid(1, kSize, 1, kSize).Call("copy", f1, p1)    // same as in(f1)
+          .WithGrid(1, kSize, 1, kSize).Call("copyBogus", p1, out(f2))
+          .Dispatch().Wait(), 
+        FunctionNotFoundException);
+  }
+
+  TEST(ComputeTestSuite, TestCall_DynamicArray) {
+    MetalComputeEngine engine;
+    engine.LoadLibrary(shaderSrc2);
+    engine.LoadLibrary(shaderSrc3);
+
+    int kSize = 10;
+    float * f1 = new float[kSize];
+    
+    engine.NewBatch()
+        .WithGrid(1, kSize, 1, kSize).Call("set", out(f1, kSize * sizeof(float)), 2.0f)
+        .Dispatch().Wait();
+
+    for (int i = 0; i < kSize; i++) {
+      ASSERT_FLOAT_EQ(2.0f, f1[i]);
+    }
+
+    delete[] f1;
+  }  
+
+  TEST(ComputeTestSuite, TestCall_Vector) {
+    MetalComputeEngine engine;
+    engine.LoadLibrary(shaderSrc2);
+    engine.LoadLibrary(shaderSrc3);
+
+    std::vector<float> v(10);
+    
+    engine.NewBatch()
+        .WithGrid(1, v.size(), 1, v.size()).Call("set", out(v), 2.0f)
+        .Dispatch().Wait();
+
+    for (int i = 0; i < v.size(); i++) {
+      ASSERT_FLOAT_EQ(2.0f, v[i]);
+    }
+  }  
+
+  TEST(ComputeTestSuite, TestCall_PointerToVector) {
+    MetalComputeEngine engine;
+    engine.LoadLibrary(shaderSrc2);
+    engine.LoadLibrary(shaderSrc3);
+
+    std::vector<float> v1(10);
+    std::vector<float> v2(10);
+    
+    engine.NewBatch()
+        .WithGrid(1, v1.size(), 1, v1.size()).Call("set", out(v1), 11.0f)
+        .WithGrid(1, v2.size(), 1, v2.size()).Call("set", out(v2), 12.0f)
+        .Dispatch().Wait();
+
+    for (int i = 0; i < v1.size(); i++) {
+      ASSERT_FLOAT_EQ(11.0f, v1[i]);
+      ASSERT_FLOAT_EQ(12.0f, v2[i]);
+    }
+
+    std::vector<float>* p1 = &v1;
+    std::vector<float>* p2 = &v2;
+
+    engine.NewBatch()
+        .WithGrid(1, v2.size(), 1, v2.size()).Call("copy", p1, out(p2))
+        .Dispatch().Wait();
+
+    for (int i = 0; i < v1.size(); i++) {
+      ASSERT_FLOAT_EQ(11.0f, v1[i]);
+      ASSERT_FLOAT_EQ(11.0f, v2[i]);
+    }
   }  
 } // compute_test
 } // compute
