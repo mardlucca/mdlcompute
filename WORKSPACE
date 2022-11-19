@@ -40,5 +40,5 @@ http_archive(
 http_archive(
   name = "metal-cpp",
   urls = ["https://github.com/mardlucca/thirdparty-libs/raw/master/cpp/macos/metal-cpp_macOS12_iOS15.zip"],
-  sha256 = "d28a0dc1a51962c60e5ce4f9162d6e86a93fe415715a41377e29e2cf13e8ceac"
+  # sha256 = "d28a0dc1a51962c60e5ce4f9162d6e86a93fe415715a41377e29e2cf13e8ceac"
 )

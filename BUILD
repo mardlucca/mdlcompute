@@ -39,12 +39,7 @@ cc_library(
   includes = [ "includes" ],
   visibility = ["//visibility:public"],
   deps = [ 
-        "@metal-cpp//:metal-cpp"
-  ],
-  linkopts = [
-      '-framework', 'Foundation',
-      '-framework', 'Metal',
-      '-framework', 'QuartzCore',
+    "@metal-cpp//:metal-cpp"
   ]
 )
 
