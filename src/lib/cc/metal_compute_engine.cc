@@ -47,10 +47,12 @@ namespace mdl {
 namespace compute {
 
   MetalComputeEngine::Batch::Batch(
-      MetalComputeEngine * engine) 
+      MetalComputeEngine * engine, bool parallel) 
       : autoReleasePool(NS::AutoreleasePool::alloc()->init()),
         engine(engine), commandBuffer(engine->commandQueue->commandBuffer()), 
-        encoder(commandBuffer->computeCommandEncoder()) {
+        encoder(commandBuffer->computeCommandEncoder(parallel 
+            ? MTL::DispatchType::DispatchTypeConcurrent 
+            : MTL::DispatchType::DispatchTypeSerial)) {
   }
 
   MetalComputeEngine::Batch::~Batch() {
@@ -137,9 +139,10 @@ namespace compute {
     return libraryByFn.count(functionName);
   }
 
-  MetalComputeEngine::BatchBuilder MetalComputeEngine::NewBatch() {
+  MetalComputeEngine::BatchBuilder MetalComputeEngine::NewBatch(bool parallel) {
     return MetalComputeEngine::BatchBuilder(
-        std::shared_ptr<MetalComputeEngine::Batch>(new MetalComputeEngine::Batch(this)));
+        std::shared_ptr<MetalComputeEngine::Batch>(
+            new MetalComputeEngine::Batch(this, parallel)));
   }
 
   MTL::ComputePipelineState* MetalComputeEngine::GetPipeline(const std::string& functionName) {

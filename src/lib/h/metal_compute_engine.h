@@ -65,7 +65,7 @@ namespace compute {
       std::size_t workGroupRows = 0;
       std::size_t workGroupCols = 0;
 
-      Batch(MetalComputeEngine * engine);
+      Batch(MetalComputeEngine * engine, bool parallel);
       ~Batch();
 
       template <class Buff>
@@ -136,7 +136,7 @@ namespace compute {
       virtual ~MetalComputeEngine();
 
       bool Available() const;
-      BatchBuilder NewBatch();
+      BatchBuilder NewBatch(bool parallel = false);
       void LoadLibrary(const std::string& sourceCode);
       bool ContainsFunction(const std::string& functionName) const;
     private:

@@ -28,7 +28,7 @@
 
 #include <gtest/gtest.h>
 
-#include <mdlcompute.h>
+#include <mdl/compute.h>
 #include <iostream>
 #include <string>
 
