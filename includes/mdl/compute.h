@@ -27,5 +27,5 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../../src/lib/h/compute_exception.h"
-#include "../../src/lib/h/arg_buffers.hpp"
+#include "../../src/lib/h/arg_buffers.h"
 #include "../../src/lib/h/metal_compute_engine.h"

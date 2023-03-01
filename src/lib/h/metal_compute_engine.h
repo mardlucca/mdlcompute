@@ -38,7 +38,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "arg_buffers.hpp"
+#include "arg_buffers.h"
 
 namespace mdl {
 namespace compute {
