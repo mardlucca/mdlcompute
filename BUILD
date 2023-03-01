@@ -1,4 +1,4 @@
-# Copyright (c) 2022, Marcio Lucca
+# Copyright (c) 2022-2023, Marcio Lucca
 # All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,8 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
   name = "mdl_compute",
-  srcs = glob(["src/lib/cc/**/*.cc"]),
-  hdrs = glob(["src/lib/h/**/*.h", "src/lib/h/**/*.hpp", "includes/**/*.h"]),
+  srcs = glob(["src/lib/cc/**/*.cc", "src/lib/h/**/*.hpp", "includes/**/*.h"]),
+  hdrs = glob(["src/lib/h/**/*.h"]),
   includes = [ "includes" ],
   visibility = ["//visibility:public"],
   deps = [ 
